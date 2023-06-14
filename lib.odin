@@ -1,18 +1,14 @@
 package assimp
 
-import c "core:c/libc"
-
 when ODIN_OS == .Windows {
 	foreign import assimp "libs/assimp-vc143-mt.lib"
-} else when(ODIN_OS == .Linux) {
-    foreign import assimp "libs/assimp.a"
 } else {
 	foreign import assimp "system:assimp"
 }
 
 @(default_calling_convention="c", link_prefix="ai")
 foreign assimp {
-	ImportFile                 :: proc(path: cstring, flags: c.uint) -> ^Scene ---
+	ImportFile                 :: proc(path: cstring, flags: u32) -> ^Scene ---
 	ReleaseImport              :: proc(scene: ^Scene) ---
 	GetErrorString             :: proc() -> cstring ---
 	IdentityMatrix4            :: proc(dest: ^Mat4) ---
@@ -25,36 +21,36 @@ foreign assimp {
 		material: ^Material,
 		key:       cstring,
 		type:      TextureType,
-		index:     c.uint,
+		index:     u32,
 		out:      ^f32,
-		max:      ^c.uint,
+		max:      ^u32,
 	) ---
 
 	GetMaterialColor :: proc(
 		material: ^Material,
 		key:       cstring,
 		type:      TextureType,
-		index:     c.uint,
+		index:     u32,
 		out:      ^Color4D,
 	) ---
 
-	GetMaterialTextureCount :: proc(material: ^Material, type: TextureType) -> c.uint ---
+	GetMaterialTextureCount :: proc(material: ^Material, type: TextureType) -> u32 ---
 
 	GetMaterialTexture :: proc(
 		material: ^Material,
 		type: TextureType,
-		index: c.uint,
+		index: u32,
 		path: ^String,
 		mapping: ^TextureMapping = nil,
-		uv_index: ^c.uint = nil,
+		uv_index: ^u32 = nil,
 		blend: ^f32 = nil,
 		op: ^TextureOp = nil,
 		mapmode: ^TextureMapMode = nil,
-		flags: ^c.uint = nil,
+		flags: ^u32 = nil,
 	) ---
 }
 
-PostProcessFlags :: enum(c.uint) {
+PostProcessFlags :: enum(u32) {
 	CalcTangentSpace         = 0x00000001,
 	JoinIdenticalVertices    = 0x00000002,
 	MakeLeftHanded           = 0x00000004,
@@ -89,7 +85,7 @@ PostProcessFlags :: enum(c.uint) {
 	GenBoundingBoxes         = 0x80000000,
 }
 
-SceneFlags :: enum(c.uint) {
+SceneFlags :: enum(u32) {
 	Incomplete        = 0x01,
 	Validated         = 0x02,
 	ValidationWarning = 0x04,
@@ -99,19 +95,19 @@ SceneFlags :: enum(c.uint) {
 }
 
 Scene :: struct {
-	flags:              c.uint,
+	flags:              u32,
 	root_node:         ^Node,
-	num_meshes:         c.uint,
+	num_meshes:         u32,
 	meshes:         [^]^Mesh,
-	num_materials:      c.uint,
+	num_materials:      u32,
 	materials:      [^]^Material,
-	num_animations:     c.uint,
+	num_animations:     u32,
 	animations:     [^]^Animation,
-	num_textures:       c.uint,
+	num_textures:       u32,
 	textures:       [^]^Texture,
-	num_lights:         c.uint,
+	num_lights:         u32,
 	lights:         [^]^Light,
-	num_cameras:        c.uint,
+	num_cameras:        u32,
 	cameras:        [^]^Camera,
 	metadata:          ^Metadata,
 	name:               String,
@@ -123,14 +119,14 @@ Node :: struct {
 	name:             String,
 	transform:        Mat4,
 	parent:          ^Node,
-	num_children:     c.uint,
+	num_children:     u32,
 	children:     [^]^Node,
-	num_meshes:       c.uint,
-	meshes:        [^]c.uint,
+	num_meshes:       u32,
+	meshes:        [^]u32,
 	metadata:        ^Metadata,
 }
 
-PrimitiveType :: enum(c.uint) {
+PrimitiveType :: enum(u32) {
 	Point            = 0x01,
 	Line             = 0x02,
 	Triangle         = 0x04,
@@ -146,29 +142,29 @@ MAX_BONE_WEIGHTS :: 0x7fffffff
 MAX_VERTICES     :: 0x7fffffff
 MAX_FACES        :: 0x7fffffff
 
-MorphingMethod :: enum(c.uint) {
+MorphingMethod :: enum(u32) {
 	VertexBlend     = 0x1,
 	MorphNormalized = 0x2,
 	MorphRelative   = 0x3,
 }
 
 Mesh :: struct {
-	primitive_types:       c.uint,
-	num_vertices:          c.uint,
-	num_faces:             c.uint,
+	primitive_types:       u32,
+	num_vertices:          u32,
+	num_faces:             u32,
 	vertices:           [^]Vector3D,
 	normals:            [^]Vector3D,
 	tangents:           [^]Vector3D,
 	bitangents:         [^]Vector3D,
 	colors:               [MAX_NUMBER_OF_COLOR_SETS]^Color4D,
 	texture_coords:       [MAX_NUMBER_OF_TEXTURECOORDS][^]Vector3D,
-	num_uv_components:    [MAX_NUMBER_OF_TEXTURECOORDS]c.uint,
+	num_uv_components:    [MAX_NUMBER_OF_TEXTURECOORDS]u32,
 	faces:              [^]Face,
-	num_bones:             c.uint,
+	num_bones:             u32,
 	bones:             [^]^Bone,
-	material_index:        c.uint,
+	material_index:        u32,
 	name:                  String,
-	num_anim_meshes:       c.uint,
+	num_anim_meshes:       u32,
 	anim_meshes:       [^]^AnimMesh,
 	method:                MorphingMethod,
 	aabb:                  AABB,
@@ -183,30 +179,30 @@ AnimMesh :: struct {
 	bitangents:     [^]Vector3D,
 	colors:           [MAX_NUMBER_OF_COLOR_SETS]^Color4D,
 	texture_coords:   [MAX_NUMBER_OF_TEXTURECOORDS]^Vector3D,
-	num_vertices:      c.uint,
-	weight:            c.float,
+	num_vertices:      u32,
+	weight:            f32,
 }
 
 Face :: struct {
-	num_indices:    c.uint,
-	indices:     [^]c.uint,
+	num_indices:    u32,
+	indices:     [^]u32,
 }
 
 Bone :: struct {
 	name:           String,
-	num_weights:    c.uint,
+	num_weights:    u32,
 	weights:     [^]VertexWeight,
 	offset_mat:     Mat4,
 }
 
 VertexWeight :: struct {
-	vertex_id: c.uint,
-	weight:    c.float,
+	vertex_id: u32,
+	weight:    f32,
 }
 
 SkeletonBone :: struct {
-	parent:         c.int,
-	num_weights:    c.uint,
+	parent:         i32,
+	num_weights:    u32,
 	mesh_id:       ^Mesh,
 	weights:     [^]VertexWeight,
 	offset_mat:     Mat4,
@@ -215,11 +211,11 @@ SkeletonBone :: struct {
 
 Skeleton :: struct {
 	name:          String,
-	num_bones:     c.uint,
+	num_bones:     u32,
 	bones:     [^]^SkeletonBone,
 }
 
-TextureOp :: enum(c.uint) {
+TextureOp :: enum(u32) {
 	Multiply  = 0x0,
 	Add       = 0x1,
 	Subtract  = 0x2,
@@ -228,14 +224,14 @@ TextureOp :: enum(c.uint) {
 	SignedAdd = 0x5,
 }
 
-TextureMapMode :: enum(c.uint) {
+TextureMapMode :: enum(u32) {
 	Wrap   = 0x0,
 	Clamp  = 0x1,
 	Decal  = 0x3,
 	Mirrow = 0x2,
 }
 
-TextureMapping :: enum(c.uint) {
+TextureMapping :: enum(u32) {
 	UV       = 0x0,
 	Sphere   = 0x1,
 	Cylinder = 0x2,
@@ -246,7 +242,7 @@ TextureMapping :: enum(c.uint) {
 
 TEXTURE_TYPE_MAX :: TextureType.Transmission
 
-TextureType :: enum(c.uint) {
+TextureType :: enum(u32) {
 	None             = 0,
 	Diffuse          = 1,
 	Specular         = 2,
@@ -271,7 +267,7 @@ TextureType :: enum(c.uint) {
 	Unknown          = 18,
 }
 
-ShadingMode :: enum(c.uint) {
+ShadingMode :: enum(u32) {
 	Flat         = 0x1,
 	Gouraud      = 0x2,
 	Phong        = 0x3,
@@ -286,13 +282,13 @@ ShadingMode :: enum(c.uint) {
 	PbrBrdf      = 0xb,
 }
 
-TextureFlags :: enum(c.uint) {
+TextureFlags :: enum(u32) {
 	Invert      = 0x1,
 	UseAlpha    = 0x2,
 	IgnoreAlpha = 0x4,
 }
 
-BlendMode :: enum(c.uint) {
+BlendMode :: enum(u32) {
 	Default  = 0x0,
 	Additive = 0x1,
 }
@@ -300,10 +296,10 @@ BlendMode :: enum(c.uint) {
 UVTransform :: struct {
 	translation: Vector2D,
 	scaling:     Vector2D,
-	rotation:    c.float,
+	rotation:    f32,
 }
 
-PropertyTypeInfo :: enum(c.uint) {
+PropertyTypeInfo :: enum(u32) {
 	Float   = 0x1,
 	Double  = 0x2,
 	String  = 0x3,
@@ -329,32 +325,32 @@ MATKEY_COLOR_BASE_IDX :: 0
 
 MaterialProperty :: struct {
 	key:            String,
-	semantic:       c.uint,
-	index:          c.uint,
-	data_length:    c.uint,
+	semantic:       u32,
+	index:          u32,
+	data_length:    u32,
 	type:           PropertyTypeInfo,
-	data:        [^]c.uchar,
+	data:        [^]u8,
 }
 
 Material :: struct {
 	properties:     [^]^MaterialProperty,
-	num_properties:     c.uint,
-	num_allocated:      c.uint,
+	num_properties:     u32,
+	num_allocated:      u32,
 }
 
 Animation :: struct {
 	name:                        String,
-	duration:                    c.double,
-	ticks_per_sec:               c.double,
-	num_channels:                c.uint,
+	duration:                    f64,
+	ticks_per_sec:               f64,
+	num_channels:                u32,
 	channels:                [^]^NodeAnim,
-	num_mesh_channels:           c.uint,
+	num_mesh_channels:           u32,
 	mesh_channels:           [^]^MeshAnim,
-	num_morph_mesh_channels:     c.uint,
+	num_morph_mesh_channels:     u32,
 	morph_mesh_channels:     [^]^MeshMorphAnim,
 }
 
-AnimBehavior :: enum(c.uint) {
+AnimBehavior :: enum(u32) {
 	Default  = 0x0,
 	Constant = 0x1,
 	Linear   = 0x2,
@@ -362,34 +358,34 @@ AnimBehavior :: enum(c.uint) {
 }
 
 MeshMorphKey :: struct {
-	time:                      c.double,
-	values:                 [^]c.uint,
-	weights:                [^]c.double,
-	num_values_and_weights:    c.uint,
+	time:                      f64,
+	values:                 [^]u32,
+	weights:                [^]f64,
+	num_values_and_weights:    u32,
 }
 
 MeshKey :: struct {
-	time:  c.double,
-	value: c.uint,
+	time:  f64,
+	value: u32,
 }
 
 VectorKey :: struct {
-	time:  c.double,
+	time:  f64,
 	value: Vector3D,
 }
 
 QuatKey :: struct {
-	time:  c.double,
+	time:  f64,
 	value: Quat,
 }
 
 NodeAnim :: struct {
 	name:                 String,
-	num_position_keys:    c.uint,
+	num_position_keys:    u32,
 	position_keys:     [^]VectorKey,
-	num_rotation_keys:    c.uint,
+	num_rotation_keys:    u32,
 	rotation_keys:     [^]QuatKey,
-	num_scaling_keys:     c.uint,
+	num_scaling_keys:     u32,
 	scaling_keys:      [^]VectorKey,
 	pre_state:            AnimBehavior,
 	post_state:           AnimBehavior,
@@ -397,31 +393,31 @@ NodeAnim :: struct {
 
 MeshAnim :: struct {
 	name:        String,
-	num_keys:    c.uint,
+	num_keys:    u32,
 	keys:     [^]MeshKey,
 }
 
 MeshMorphAnim :: struct {
 	name:     String,
-	num_keys: c.uint,
+	num_keys: u32,
 	keys:     MeshMorphKey,
 }
 
 HINT_MAX_TEXTURE_LEN :: 9
 
 Texture :: struct {
-	width:          c.uint,
-	height:         c.uint,
-	format_hint:   [HINT_MAX_TEXTURE_LEN]c.char,
+	width:          u32,
+	height:         u32,
+	format_hint:   [HINT_MAX_TEXTURE_LEN]u8,
 	data:        [^]Texel,
 	filename:       String,
 }
 
 Texel :: struct {
-	b, g, r, a: c.uchar,
+	b, g, r, a: u8,
 }
 
-LightSourceType :: enum(c.uint) {
+LightSourceType :: enum(u32) {
 	Undefined   = 0x0,
 	Directional = 0x1,
 	Point       = 0x2,
@@ -436,14 +432,14 @@ Light :: struct {
 	position:              Vector3D,
 	direction:             Vector3D,
 	up:                    Vector3D,
-	attenuation_constant:  c.float,
-	attenuation_linear:    c.float,
-	attenuation_quadratic: c.float,
+	attenuation_constant:  f32,
+	attenuation_linear:    f32,
+	attenuation_quadratic: f32,
 	color_diffuse:         Color3D,
 	color_specular:        Color3D,
 	color_ambient:         Color3D,
-	angle_inner_cone:      c.float,
-	angle_outer_cone:      c.float,
+	angle_inner_cone:      f32,
+	angle_outer_cone:      f32,
 	size:                  Vector2D,
 }
 
@@ -452,14 +448,14 @@ Camera :: struct {
 	position:        Vector3D,
 	up:              Vector3D,
 	look_at:         Vector3D,
-	h_fov:           c.float,
-	clip_plane_near: c.float,
-	clip_plane_far:  c.float,
-	aspect_ratio:    c.float,
-	ortho_width:     c.float,
+	h_fov:           f32,
+	clip_plane_near: f32,
+	clip_plane_far:  f32,
+	aspect_ratio:    f32,
+	ortho_width:     f32,
 }
 
-MetadataType :: enum(c.uint) {
+MetadataType :: enum(u32) {
 	Bool       = 0,
 	Int32      = 1,
 	UInt32     = 2,
@@ -472,7 +468,7 @@ MetadataType :: enum(c.uint) {
 }
 
 Metadata :: struct {
-	num_properties:    c.uint,
+	num_properties:    u32,
 	keys:           [^]String,
 	values:         [^]MetadataEntry,
 }
@@ -486,42 +482,21 @@ MAX_STRING_LEN :: 1024
 
 String :: struct {
 	length: u32,
-	data: [MAX_STRING_LEN]c.char,
+	data: [MAX_STRING_LEN]u8,
 }
 
-Vector2D :: struct {
-	x, y: c.float,
-}
+Vector2D :: distinct [2]f32
+Vector3D :: distinct [3]f32
 
-Vector3D :: struct {
-	x, y, z: c.float,
-}
+// w, x, y, z
+Quat :: distinct [4]f32
 
-Quat :: struct {
-	w, x, y, z: c.float,
-}
-
-Mat3 :: struct {
-	a1, a2, a3: c.float,
-	b1, b2, b3: c.float,
-	c1, c2, c3: c.float,
-}
-
-Mat4 :: struct {
-	a1, a2, a3, a4: c.float,
-	b1, b2, b3, b4: c.float,
-	c1, c2, c3, c4: c.float,
-	d1, d2, d3, d4: c.float,
-}
+Mat3 :: distinct matrix[3, 3]f32
+Mat4 :: distinct matrix[4, 4]f32
 
 AABB :: struct {
 	min, max: Vector3D,
 }
 
-Color3D :: struct {
-	r, g, b: c.float,
-}
-
-Color4D :: struct {
-	r, g, b, a: c.float,
-}
+Color3D :: distinct [3]f32
+Color4D :: distinct [4]f32
