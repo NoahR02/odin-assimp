@@ -106,20 +106,20 @@ Scene :: struct {
 	flags:              u32,
 	root_node:         ^Node,
 	num_meshes:         u32,
-	meshes:         [^]^Mesh,
+	meshes:         ^[^]Mesh,
 	num_materials:      u32,
-	materials:      [^]^Material,
+	materials:      ^[^]Material,
 	num_animations:     u32,
-	animations:     [^]^Animation,
+	animations:     ^[^]Animation,
 	num_textures:       u32,
-	textures:       [^]^Texture,
+	textures:       ^[^]Texture,
 	num_lights:         u32,
-	lights:         [^]^Light,
+	lights:         ^[^]Light,
 	num_cameras:        u32,
-	cameras:        [^]^Camera,
+	cameras:        ^[^]Camera,
 	metadata:          ^Metadata,
 	name:               String,
-	skeletons:      [^]^Skeleton,
+	skeletons:      ^[^]Skeleton,
 	private_data_do_not_touch: rawptr,
 }
 
@@ -128,9 +128,9 @@ Node :: struct {
 	transform:        Matrix4x4,
 	parent:          ^Node,
 	num_children:     u32,
-	children:     [^]^Node,
+	children:     	 ^[^]Node,
 	num_meshes:       u32,
-	meshes:        [^]u32,
+	meshes:        	 [^]u32,
 	metadata:        ^Metadata,
 }
 
@@ -169,14 +169,14 @@ Mesh :: struct {
 	num_uv_components:    [MAX_NUMBER_OF_TEXTURECOORDS]u32,
 	faces:              [^]Face,
 	num_bones:             u32,
-	bones:             [^]^Bone,
+	bones:             ^[^]Bone,
 	material_index:        u32,
 	name:                  String,
 	num_anim_meshes:       u32,
-	anim_meshes:       [^]^Animation_Mesh,
+	anim_meshes:       ^[^]Animation_Mesh,
 	method:                Morphing_Method,
 	aabb:                  AABB,
-	texture_coords_names: [^]^String,
+	texture_coords_names: ^[^]String,
 }
 
 Animation_Mesh :: struct {
@@ -220,7 +220,7 @@ Skeleton_Bone :: struct {
 Skeleton :: struct {
 	name:          String,
 	num_bones:     u32,
-	bones:     [^]^Skeleton_Bone,
+	bones:     ^[^]Skeleton_Bone,
 }
 
 Texture_Op :: enum(u32) {
@@ -337,11 +337,11 @@ Material_Property :: struct {
 	index:          u32,
 	data_length:    u32,
 	type:           Property_Type_Info,
-	data:        [^]u8,
+	data:        [^]byte,
 }
 
 Material :: struct {
-	properties:     [^]^Material_Property,
+	properties:     ^[^]Material_Property,
 	num_properties:     u32,
 	num_allocated:      u32,
 }
@@ -351,11 +351,11 @@ Animation :: struct {
 	duration:                    f64,
 	ticks_per_sec:               f64,
 	num_channels:                u32,
-	channels:                [^]^Node_Animation,
+	channels:                ^[^]Node_Animation,
 	num_mesh_channels:           u32,
-	mesh_channels:           [^]^Mesh_Animation,
+	mesh_channels:           ^[^]Mesh_Animation,
 	num_morph_mesh_channels:     u32,
-	morph_mesh_channels:     [^]^Mesh_Morph_Animation,
+	morph_mesh_channels:     ^[^]Mesh_Morph_Animation,
 }
 
 Animation_Behavior :: enum(u32) {
@@ -422,7 +422,7 @@ Texture :: struct {
 }
 
 Texel :: struct {
-	b, g, r, a: u8,
+	b, g, r, a: byte,
 }
 
 Light_Source_Type :: enum(u32) {
@@ -490,7 +490,7 @@ MAX_STRING_LEN :: 1024
 
 String :: struct {
 	length: u32,
-	data: [MAX_STRING_LEN]u8,
+	data: [MAX_STRING_LEN]byte,
 }
 
 Vector2D :: distinct [2]f32
@@ -499,8 +499,18 @@ Vector3D :: distinct [3]f32
 // w, x, y, z
 Quat :: distinct [4]f32
 
-Matrix3x3 :: distinct matrix[3, 3]f32
-Matrix4x4 :: distinct matrix[4, 4]f32
+Matrix3x3 :: struct {
+	a1, a2, a3: f32,
+	b1, b2, b3: f32,
+	c1, c2, c3: f32,
+}
+
+Matrix4x4 :: struct {
+	a1, a2, a3, a4: f32,
+	b1, b2, b3, b4: f32,
+	c1, c2, c3, c4: f32,
+	d1, d2, d3, d4: f32,
+}
 
 AABB :: struct {
 	min, max: Vector3D,
